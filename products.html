@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>All Parts — JRK Auto Parts | Genuine Spare Parts & Accessories</title>
+  <meta name="description" content="Browse all spare parts and accessories. Filter by category, price, and rating. Free delivery across India." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚙️</text></svg>" />
+  <link rel="stylesheet" href="styles/main.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" />
+  <style>
+    /* ── Page Header ── */
+    .page-hero {
+      padding: 8rem 0 4rem;
+      background: linear-gradient(180deg, rgba(230,57,70,0.08) 0%, transparent 100%);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      position: relative;
+      overflow: hidden;
+    }
+    .page-hero::before {
+      content:'';
+      position:absolute;inset:0;
+      background-image:
+        linear-gradient(rgba(230,57,70,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(230,57,70,0.04) 1px, transparent 1px);
+      background-size: 60px 60px;
+    }
+    .page-hero-inner { position:relative;z-index:1; }
+    .breadcrumb {
+      display:flex;align-items:center;gap:0.5rem;
+      font-family:'Rajdhani',sans-serif;font-size:0.85rem;
+      color:var(--text-muted);margin-bottom:1.5rem;
+    }
+    .breadcrumb a { color:var(--text-muted);transition:var(--transition); }
+    .breadcrumb a:hover { color:var(--accent-red); }
+    .breadcrumb-sep { color:rgba(255,255,255,0.2); }
+
+    /* ── Sidebar + Grid Layout ── */
+    .shop-layout {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      gap: 2rem;
+      align-items: start;
+      padding: 3rem 0 5rem;
+    }
+    .shop-sidebar {
+      position: sticky;
+      top: 90px;
+    }
+    .sidebar-card {
+      background: var(--bg-card);
+      border: var(--border-glass);
+      border-radius: var(--radius-md);
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    .sidebar-title {
+      font-family:'Rajdhani',sans-serif;
+      font-size:0.75rem;
+      font-weight:700;
+      letter-spacing:2px;
+      text-transform:uppercase;
+      color:var(--text-secondary);
+      margin-bottom:1rem;
+    }
+    .sidebar-cats { display:flex;flex-direction:column;gap:0.4rem; }
+    .sidebar-cat-btn {
+      display:flex;align-items:center;gap:0.75rem;
+      padding:0.6rem 0.75rem;
+      border-radius:var(--radius-sm);
+      font-family:'Rajdhani',sans-serif;font-size:0.95rem;font-weight:600;
+      color:var(--text-secondary);
+      cursor:pointer;
+      transition:var(--transition);
+      border:none;background:transparent;width:100%;text-align:left;
+    }
+    .sidebar-cat-btn:hover { color:var(--text-primary);background:var(--bg-glass); }
+    .sidebar-cat-btn.active { color:white;background:var(--gradient-hero);border-radius:var(--radius-sm); }
+    .sidebar-cat-count {
+      margin-left:auto;
+      font-size:0.75rem;color:var(--text-muted);
+      background:var(--bg-glass);
+      border-radius:100px;
+      padding:2px 8px;
+    }
+    .sidebar-cat-btn.active .sidebar-cat-count { background:rgba(255,255,255,0.2);color:white; }
+
+    /* Price Range */
+    .price-range-labels { display:flex;justify-content:space-between;font-family:'Orbitron',monospace;font-size:0.75rem;color:var(--text-secondary);margin-bottom:0.5rem; }
+    .price-slider { width:100%;accent-color:var(--accent-red);cursor:pointer; }
+
+    /* Sort Bar */
+    .sort-bar {
+      display:flex;align-items:center;gap:1rem;flex-wrap:wrap;
+      margin-bottom:1.5rem;
+      padding:1rem 1.25rem;
+      background:var(--bg-card);
+      border:var(--border-glass);
+      border-radius:var(--radius-md);
+    }
+    .sort-count { font-family:'Rajdhani',sans-serif;font-size:0.9rem;color:var(--text-secondary);flex:1; }
+    .sort-count strong { color:var(--text-primary); }
+    .sort-select {
+      background:var(--bg-glass);
+      border:var(--border-glass);
+      border-radius:var(--radius-sm);
+      padding:0.5rem 1rem;
+      color:var(--text-primary);
+      font-family:'Rajdhani',sans-serif;font-size:0.9rem;
+      cursor:pointer;outline:none;
+    }
+    .sort-select option { background:var(--bg-secondary); }
+    .view-toggle { display:flex;gap:0.4rem; }
+    .view-btn {
+      width:36px;height:36px;
+      background:var(--bg-glass);border:var(--border-glass);border-radius:var(--radius-sm);
+      display:flex;align-items:center;justify-content:center;
+      cursor:pointer;color:var(--text-secondary);font-size:0.8rem;
+      transition:var(--transition);
+    }
+    .view-btn.active { background:var(--accent-red);color:white;border-color:var(--accent-red); }
+
+    /* Sub-category pills */
+    .subcat-pills { display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:2rem; }
+    .subcat-pill {
+      background:var(--bg-glass);border:var(--border-glass);border-radius:100px;
+      padding:0.35rem 1rem;font-family:'Rajdhani',sans-serif;font-size:0.8rem;font-weight:600;
+      color:var(--text-muted);cursor:pointer;transition:var(--transition);
+    }
+    .subcat-pill:hover { color:var(--text-primary); }
+    .subcat-pill.active { background:rgba(230,57,70,0.15);border-color:rgba(230,57,70,0.4);color:var(--accent-red); }
+
+    /* Empty state */
+    .empty-state {
+      text-align:center;padding:5rem 2rem;
+      color:var(--text-muted);
+      font-family:'Rajdhani',sans-serif;
+    }
+    .empty-icon { font-size:3rem;margin-bottom:1rem; }
+
+    /* List view */
+    .products-grid.list-view { grid-template-columns:1fr; }
+    .products-grid.list-view .product-card { display:flex;align-items:center; }
+    .products-grid.list-view .card-image { width:180px;flex-shrink:0; }
+    .products-grid.list-view .card-body { flex:1; }
+
+    @media(max-width:900px){
+      .shop-layout { grid-template-columns:1fr; }
+      .shop-sidebar { display:none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Loader ── -->
+<div class="loader" id="loader">
+  <div class="loader-logo">JRK<span style="color:var(--accent-orange)">AUTO PARTS</span></div>
+  <div class="loader-bar"><div class="loader-progress"></div></div>
+</div>
+
+<!-- ── Navbar ── -->
+<nav class="navbar" id="navbar">
+  <div class="container">
+    <div class="navbar-inner">
+      <a href="index.html" class="logo">
+        <div class="logo-icon">⚙️</div>
+        <div>
+          <div class="logo-text">JRK<span class="text-gradient">AUTO PARTS</span></div>
+          <div class="logo-sub">Premium Spare Parts</div>
+        </div>
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="products.html" class="active">All Parts</a></li>
+        <li><a href="products.html?cat=parts&sub=engine">Engine Parts</a></li>
+        <li><a href="products.html?cat=parts&sub=accessories">Accessories</a></li>
+        <li><a href="index.html#about">About</a></li>
+      </ul>
+      <div class="nav-actions">
+        <button class="nav-btn" onclick="openSearch()"><i class="fas fa-search"></i></button>
+        <button class="nav-btn" onclick="openCart()" id="cart-btn">
+          <i class="fas fa-shopping-cart"></i>
+          <span class="cart-count" style="display:none;">0</span>
+        </button>
+        <div class="hamburger" id="hamburger"><span></span><span></span><span></span></div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="mobile-overlay" id="mobile-overlay"></div>
+<nav class="mobile-nav" id="mobile-nav">
+  <a href="index.html">🏠 Home</a>
+  <a href="products.html">🛒 All Parts</a>
+  <a href="products.html?cat=parts&sub=engine">⚙️ Engine Parts</a>
+  <a href="products.html?cat=parts&sub=accessories">🎽 Accessories</a>
+</nav>
+
+<!-- ── Page Hero ── -->
+<div class="page-hero">
+  <div class="container page-hero-inner">
+    <div class="breadcrumb">
+      <a href="index.html">Home</a>
+      <span class="breadcrumb-sep">/</span>
+      <span id="breadcrumb-current">All Parts</span>
+    </div>
+    <h1 id="page-title" style="font-size:clamp(1.8rem,4vw,3rem);margin-bottom:0.5rem;">
+      All <span class="text-gradient">Parts</span>
+    </h1>
+    <p id="page-subtitle" style="font-family:'Rajdhani',sans-serif;color:var(--text-secondary);font-size:1.05rem;">
+      Browse our complete collection of genuine spare parts and accessories.
+    </p>
+  </div>
+</div>
+
+<!-- ── Shop Layout ── -->
+<div class="container">
+  <div class="shop-layout">
+    <!-- Sidebar -->
+    <aside class="shop-sidebar">
+      <!-- Categories -->
+      <div class="sidebar-card">
+        <div class="sidebar-title">📂 Categories</div>
+        <div class="sidebar-cats">
+          <button class="sidebar-cat-btn active" data-filter="all" onclick="applySidebarFilter('all')">
+            📦 All Parts <span class="sidebar-cat-count" id="cnt-all">20</span>
+          </button>
+          <button class="sidebar-cat-btn" data-filter="engine" onclick="applySidebarFilter('engine')">
+            🔩 Engine Parts <span class="sidebar-cat-count" id="cnt-engine">0</span>
+          </button>
+          <button class="sidebar-cat-btn" data-filter="brakes" onclick="applySidebarFilter('brakes')">
+            🛑 Brakes <span class="sidebar-cat-count" id="cnt-brakes">0</span>
+          </button>
+          <button class="sidebar-cat-btn" data-filter="suspension" onclick="applySidebarFilter('suspension')">
+            🔧 Suspension <span class="sidebar-cat-count" id="cnt-suspension">0</span>
+          </button>
+          <button class="sidebar-cat-btn" data-filter="exhaust" onclick="applySidebarFilter('exhaust')">
+            💨 Exhaust <span class="sidebar-cat-count" id="cnt-exhaust">0</span>
+          </button>
+          <button class="sidebar-cat-btn" data-filter="electrical" onclick="applySidebarFilter('electrical')">
+            ⚡ Electrical <span class="sidebar-cat-count" id="cnt-electrical">0</span>
+          </button>
+          <button class="sidebar-cat-btn" data-filter="tyres" onclick="applySidebarFilter('tyres')">
+            🔵 Tyres <span class="sidebar-cat-count" id="cnt-tyres">0</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Price Filter -->
+      <div class="sidebar-card">
+        <div class="sidebar-title">💰 Price Range</div>
+        <div class="price-range-labels">
+          <span>₹850</span>
+          <span id="price-label">₹2,45,000</span>
+        </div>
+        <input type="range" class="price-slider" id="price-slider" min="850" max="245000" value="245000" oninput="updatePriceFilter(this.value)" />
+      </div>
+
+      <!-- Featured -->
+      <div class="sidebar-card">
+        <div class="sidebar-title">⭐ Filter</div>
+        <div class="sidebar-cats">
+          <button class="sidebar-cat-btn" onclick="filterFeatured()">🔥 Featured Only</button>
+          <button class="sidebar-cat-btn" onclick="filterInStock()">✅ In Stock</button>
+          <button class="sidebar-cat-btn" onclick="applySidebarFilter('all')">🔄 Reset</button>
+        </div>
+      </div>
+
+      <!-- CTA -->
+      <div class="sidebar-card" style="background:linear-gradient(135deg,rgba(230,57,70,0.1),rgba(124,58,237,0.08));border-color:rgba(230,57,70,0.2);">
+        <div style="font-size:1.5rem;margin-bottom:0.5rem;">🎯</div>
+        <div class="sidebar-title">Need Help?</div>
+        <p style="font-family:'Rajdhani',sans-serif;font-size:0.85rem;color:var(--text-muted);margin-bottom:1rem;">Our experts help you find the perfect part for your needs.</p>
+        <button class="btn-primary" style="width:100%;padding:0.6rem;" onclick="showToast('Connecting you to our expert...','info')">Chat with Expert</button>
+      </div>
+    </aside>
+
+    <!-- Main Products Area -->
+    <main>
+      <!-- Sub-cat pills -->
+      <div class="subcat-pills" id="subcat-pills"></div>
+
+      <!-- Sort Bar -->
+      <div class="sort-bar">
+        <div class="sort-count">Showing <strong id="product-count">20</strong> products</div>
+        <select class="sort-select" id="sort-select" onchange="applySortAndRender()">
+          <option value="default">Default</option>
+          <option value="price-asc">Price: Low to High</option>
+          <option value="price-desc">Price: High to Low</option>
+          <option value="rating">Top Rated</option>
+          <option value="discount">Biggest Discount</option>
+        </select>
+        <div class="view-toggle">
+          <button class="view-btn active" id="grid-view-btn" onclick="setView('grid')" title="Grid view">⊞</button>
+          <button class="view-btn" id="list-view-btn" onclick="setView('list')" title="List view">☰</button>
+        </div>
+      </div>
+
+      <!-- Filter Pills (mobile) -->
+      <div class="filter-bar" id="mobile-filter-bar" style="display:none;justify-content:flex-start;">
+        <button class="filter-btn active" data-filter="all" onclick="applySidebarFilter('all')">All</button>
+        <button class="filter-btn" data-filter="engine" onclick="applySidebarFilter('engine')">🔩 Engine</button>
+        <button class="filter-btn" data-filter="brakes" onclick="applySidebarFilter('brakes')">🛑 Brakes</button>
+        <button class="filter-btn" data-filter="suspension" onclick="applySidebarFilter('suspension')">🔧 Suspension</button>
+      </div>
+
+      <!-- Products Grid -->
+      <div class="products-grid" id="products-grid"></div>
+    </main>
+  </div>
+</div>
+
+<!-- ── Cart Sidebar ── -->
+<div class="cart-sidebar" id="cart-sidebar">
+  <div class="cart-header">
+    <div class="cart-title">🛒 Your Cart</div>
+    <button class="close-btn" onclick="closeCart()">✕</button>
+  </div>
+  <div class="cart-items" id="cart-items"></div>
+  <div class="cart-footer">
+    <div class="cart-total">
+      <span class="cart-total-label">Total</span>
+      <span class="cart-total-amount" id="cart-total">₹0</span>
+    </div>
+    <button class="checkout-btn" onclick="handleCheckout()">⚡ Proceed to Checkout</button>
+  </div>
+</div>
+
+<!-- ── Product Modal ── -->
+<div class="modal-overlay" id="modal-overlay"></div>
+
+<!-- ── Search Modal ── -->
+<div class="search-modal" id="search-modal">
+  <div style="text-align:center;margin-bottom:1.5rem;">
+    <div style="font-family:'Orbitron',monospace;font-size:0.75rem;letter-spacing:3px;color:var(--text-muted);text-transform:uppercase;">Press ESC to close</div>
+  </div>
+  <div class="search-input-wrap">
+    <span class="search-icon">🔍</span>
+    <input type="text" class="search-input" id="main-search" placeholder="Search bikes, parts, models..." />
+  </div>
+  <div class="search-results" id="search-results"></div>
+</div>
+
+<!-- ── Toast ── -->
+<div class="toast-container" id="toast-container"></div>
+
+<!-- ── Scripts ── -->
+<script src="js/products-data.js"></script>
+<script src="js/main.js"></script>
+<script>
+  let currentCategory = 'all';
+  let currentView = 'grid';
+  let currentSubcat = 'all';
+  let maxPrice = 245000;
+  let filteredProducts = [...PRODUCTS];
+
+  // ── Read URL params ──
+  const urlParams = new URLSearchParams(window.location.search);
+  const urlCat = urlParams.get('cat');
+  const urlSub = urlParams.get('sub');
+
+  // ── Apply filter from sidebar ──
+  function applySidebarFilter(subCategory) {
+    currentCategory = 'parts';
+    currentSubcat = subCategory;
+    updateSidebarActive(subCategory);
+    updatePageHeader(subCategory);
+    applyFiltersAndRender();
+  }
+
+  function updateSidebarActive(subCategory) {
+    document.querySelectorAll('.sidebar-cat-btn[data-filter]').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.filter === subCategory);
+    });
+    document.querySelectorAll('.filter-btn[data-filter]').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.filter === subCategory);
+    });
+  }
+
+  function updatePageHeader(subCategory) {
+    const titles = {
+      all: ['All Parts', 'Browse our complete collection of genuine spare parts and accessories.'],
+      engine: ['Engine Parts', 'High-performance engine components and rebuild kits.'],
+      brakes: ['Brakes', 'Racing-spec and standard brake kits and pads.'],
+      suspension: ['Suspension', 'Premium shocks, forks, and rebuild kits.'],
+      exhaust: ['Exhaust Systems', 'Slip-ons and full exhaust systems for better breathability.'],
+      electrical: ['Electrical', 'Batteries, LEDs, and electrical components.'],
+      tyres: ['Tyres & Wheels', 'Premium rubber for track and street.']
+    };
+    const [title, sub] = titles[subCategory] || titles.all;
+    document.getElementById('page-title').innerHTML = `⚙️ <span class="text-gradient">${title}</span>`;
+    document.getElementById('page-subtitle').textContent = sub;
+    document.getElementById('breadcrumb-current').textContent = title;
+  }
+
+  // ── Sub-category pills ──
+  function setSubcat(sub) {
+    currentSubcat = sub;
+    applyFiltersAndRender();
+  }
+
+  // ── Price filter ──
+  function updatePriceFilter(val) {
+    maxPrice = parseInt(val);
+    document.getElementById('price-label').textContent = '₹' + parseInt(val).toLocaleString('en-IN');
+    applyFiltersAndRender();
+  }
+
+  // ── Special filters ──
+  function filterFeatured() {
+    filteredProducts = PRODUCTS.filter(p => p.featured && p.price <= maxPrice);
+    renderFilteredProducts();
+  }
+  function filterInStock() {
+    filteredProducts = PRODUCTS.filter(p => p.inStock && p.price <= maxPrice);
+    renderFilteredProducts();
+  }
+  function filterElectric() {
+    filteredProducts = PRODUCTS.filter(p => false); // no electric vehicles
+    renderFilteredProducts();
+  }
+
+  // ── Combined filter + sort ──
+  function applyFiltersAndRender() {
+    let base = [...PRODUCTS];
+    if (currentSubcat !== 'all') {
+      base = base.filter(p => p.subcategory === currentSubcat);
+    }
+    base = base.filter(p => p.price <= maxPrice);
+    filteredProducts = base;
+    applySortAndRender();
+  }
+
+  function applySortAndRender() {
+    const sort = document.getElementById('sort-select')?.value || 'default';
+    let sorted = [...filteredProducts];
+    if (sort === 'price-asc') sorted.sort((a,b) => a.price - b.price);
+    if (sort === 'price-desc') sorted.sort((a,b) => b.price - a.price);
+    if (sort === 'rating') sorted.sort((a,b) => b.rating - a.rating);
+    if (sort === 'discount') sorted.sort((a,b) => {
+      const da = a.originalPrice ? (a.originalPrice - a.price) / a.originalPrice : 0;
+      const db = b.originalPrice ? (b.originalPrice - b.price) / b.originalPrice : 0;
+      return db - da;
+    });
+    renderCustomGrid(sorted);
+  }
+
+  // ── Render ──
+  function renderCustomGrid(products) {
+    const container = document.getElementById('products-grid');
+    const countEl = document.getElementById('product-count');
+    if (countEl) countEl.textContent = products.length;
+
+    if (products.length === 0) {
+      container.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">
+        <div class="empty-icon">🔍</div>
+        <h3 style="font-family:'Rajdhani',sans-serif;margin-bottom:0.5rem;">No products found</h3>
+        <p>Try adjusting your filters or price range.</p>
+        <button class="btn-primary" style="margin-top:1rem;padding:0.6rem 1.5rem;" onclick="applySidebarFilter('all')">Clear Filters</button>
+      </div>`;
+      return;
+    }
+
+    const ICONS = { bikes:'🏍️', scooters:'🛵', parts:'⚙️' };
+    container.innerHTML = products.map(p => {
+      const discount = p.originalPrice ? Math.round(((p.originalPrice - p.price) / p.originalPrice) * 100) : 0;
+      const stars = '★'.repeat(Math.floor(p.rating)) + '☆'.repeat(5 - Math.floor(p.rating));
+      const icon = '⚙️';
+      const specs = `<div class="card-spec"><strong>Fits</strong>${(p.compatibility||'Universal').length > 18 ? (p.compatibility||'Universal').slice(0,18)+'...' : p.compatibility||'Universal'}</div><div class="card-spec"><strong>Material</strong>${p.material||'—'}</div>`;
+      return `
+        <div class="product-card reveal" onclick="openProductModal(${p.id})">
+          <div class="card-image">
+            <span class="badge card-badge" style="background:${p.badgeColor}22;color:${p.badgeColor};">${p.badge}</span>
+            <div class="card-actions" onclick="event.stopPropagation()">
+              <button class="card-action-btn" title="Add to Cart" onclick="addToCart(${p.id})">🛒</button>
+              <button class="card-action-btn" title="Quick View" onclick="openProductModal(${p.id})">👁️</button>
+            </div>
+            <div style="font-size:4rem;position:relative;z-index:1;">${icon}</div>
+          </div>
+          <div class="card-body">
+            <div class="card-category">${p.category} / ${p.subcategory}</div>
+            <div class="card-name">${p.name}</div>
+            <div class="card-specs">${specs}</div>
+            <div class="card-rating">
+              <span class="stars">${stars}</span>
+              <span class="rating-num">${p.rating}</span>
+              <span class="rating-count">(${p.reviews})</span>
+            </div>
+            <div class="card-footer">
+              <div class="card-price">
+                <span class="price-current">${formatPrice(p.price)}</span>
+                ${p.originalPrice ? `<span class="price-original">${formatPrice(p.originalPrice)}</span>` : ''}
+                ${discount > 0 ? `<span class="price-discount">-${discount}% OFF</span>` : ''}
+              </div>
+              <button class="add-to-cart-btn" onclick="event.stopPropagation();addToCart(${p.id})">🛒 Add</button>
+            </div>
+          </div>
+        </div>`;
+    }).join('');
+    observeRevealElements();
+  }
+
+  // ── View toggle ──
+  function setView(view) {
+    currentView = view;
+    const grid = document.getElementById('products-grid');
+    if (view === 'list') {
+      grid.classList.add('list-view');
+      document.getElementById('grid-view-btn').classList.remove('active');
+      document.getElementById('list-view-btn').classList.add('active');
+    } else {
+      grid.classList.remove('list-view');
+      document.getElementById('grid-view-btn').classList.add('active');
+      document.getElementById('list-view-btn').classList.remove('active');
+    }
+  }
+
+  // ── Update category counts ──
+  function updateCounts() {
+    document.getElementById('cnt-all').textContent = PRODUCTS.length;
+    document.getElementById('cnt-engine').textContent = PRODUCTS.filter(p=>p.subcategory==='engine').length;
+    document.getElementById('cnt-brakes').textContent = PRODUCTS.filter(p=>p.subcategory==='brakes').length;
+    document.getElementById('cnt-suspension').textContent = PRODUCTS.filter(p=>p.subcategory==='suspension').length;
+    document.getElementById('cnt-exhaust').textContent = PRODUCTS.filter(p=>p.subcategory==='exhaust').length;
+    document.getElementById('cnt-electrical').textContent = PRODUCTS.filter(p=>p.subcategory==='electrical').length;
+    document.getElementById('cnt-tyres').textContent = PRODUCTS.filter(p=>p.subcategory==='tyres').length;
+  }
+
+  // ── Search modal click outside ──
+  document.getElementById('search-modal')?.addEventListener('click', function(e) {
+    if (e.target === this) closeSearch();
+  });
+
+  // ── Init ──
+  window.addEventListener('DOMContentLoaded', () => {
+    updateCounts();
+
+    // Handle URL params
+    if (urlCat === 'parts' && urlSub) {
+      currentCategory = 'parts';
+      currentSubcat = urlSub;
+      applySidebarFilter(urlSub);
+    } else if (urlSub) {
+      currentSubcat = urlSub;
+      applySidebarFilter(urlSub);
+    } else {
+      applySidebarFilter('all');
+    }
+
+    applyFiltersAndRender();
+
+    // Show mobile filters on small screens
+    if (window.innerWidth < 900) {
+      document.getElementById('mobile-filter-bar').style.display = 'flex';
+    }
+  });
+</script>
+</body>
+</html>

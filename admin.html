@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JRK Auto Parts | Professional Admin Dashboard</title>
+  <link rel="stylesheet" href="styles/main.css" />
+  <style>
+    * { box-sizing: border-box; }
+    :root {
+      --sidebar-width: 250px;
+      --dashboard-bg: #09090b;
+      --card-bg: rgba(255, 255, 255, 0.03);
+      --card-border: rgba(255, 255, 255, 0.08);
+    }
+    body { background: var(--dashboard-bg); color: var(--text-primary); margin: 0; display: flex; height: 100vh; overflow: hidden; }
+    
+    /* ── Sidebar ── */
+    .sidebar { width: var(--sidebar-width); background: #000; border-right: 1px solid var(--card-border); display: flex; flex-direction: column; padding: 1.5rem; }
+    .sidebar-logo { display:flex; align-items:center; gap:10px; margin-bottom: 3rem; text-decoration: none; color: white; }
+    .sidebar-logo .logo-icon { font-size: 2rem; }
+    .sidebar-logo .logo-text { font-family: 'Orbitron', monospace; font-size: 1.4rem; font-weight: 700; }
+    .sidebar-menu { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.5rem; }
+    .sidebar-menu li a { display: flex; align-items: center; gap: 1rem; color: var(--text-secondary); text-decoration: none; padding: 0.8rem 1rem; border-radius: 8px; font-family: 'Rajdhani', sans-serif; font-size: 1.1rem; transition: background 0.3s, color 0.3s; }
+    .sidebar-menu li a:hover, .sidebar-menu li a.active { background: rgba(230,57,70,0.1); color: var(--accent-red); border-left: 3px solid var(--accent-red); }
+    
+    /* ── Main Canvas ── */
+    .main-canvas { flex: 1; display: flex; flex-direction: column; overflow-y: auto; overflow-x: hidden; background: radial-gradient(circle at top left, rgba(230,57,70,0.02), transparent 50%); padding: 1.5rem 2rem; width: calc(100% - var(--sidebar-width)); }
+    
+    /* ── Top Nav ── */
+    .top-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; background: var(--card-bg); padding: 1rem 1.5rem; border-radius: 12px; border: 1px solid var(--card-border); }
+    .search-box { display: flex; align-items: center; background: rgba(255,255,255,0.05); padding: 0.5rem 1rem; border-radius: 100px; width: 300px; }
+    .search-box input { background: transparent; border: none; color: white; margin-left: 0.5rem; width: 100%; outline: none; font-family: 'Rajdhani', sans-serif; }
+    .top-nav-actions { display: flex; align-items: center; gap: 1.5rem; }
+    .nav-icon { color: var(--text-secondary); font-size: 1.2rem; cursor: pointer; transition: color 0.3s; position: relative; }
+    .nav-icon:hover { color: var(--accent-red); }
+    .badge-dot { position: absolute; top: -5px; right: -5px; width: 8px; height: 8px; background: var(--accent-red); border-radius: 50%; }
+    .admin-profile { display: flex; align-items: center; gap: 0.8rem; border-left: 1px solid var(--card-border); padding-left: 1.5rem; cursor: pointer; }
+    .avatar { width: 36px; height: 36px; background: rgba(230,57,70,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--accent-red); font-weight: bold; }
+    
+    /* ── KPI Grid ── */
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+    .kpi-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 1.5rem; display: flex; align-items: center; gap: 1rem; transition: transform 0.3s; }
+    .kpi-card:hover { transform: translateY(-5px); border-color: rgba(230,57,70,0.3); }
+    .kpi-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
+    .kpi-info h3 { margin: 0; font-family: 'Orbitron', monospace; font-size: 1.5rem; color: var(--text-primary); }
+    .kpi-info p { margin: 0; font-family: 'Rajdhani', sans-serif; color: var(--text-muted); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; }
+    
+    /* ── Main Grid ── */
+    .main-grid { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1.2fr); gap: 2rem; }
+    @media (max-width: 1200px) { .main-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 1rem; } }
+    @media (max-width: 900px)  { .main-grid { grid-template-columns: 1fr; } }
+    
+    /* ── Inventory Section ── */
+    .panel-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 1.5rem; display: flex; flex-direction: column; }
+    .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+    .panel-title { font-family: 'Orbitron', monospace; font-size: 1.2rem; color: var(--accent-red); margin: 0; }
+    
+    .table-container { flex: 1; overflow-y: auto; border-radius: 8px; border: 1px solid var(--card-border); max-height: 500px; }
+    .table-container::-webkit-scrollbar { width: 6px; }
+    .table-container::-webkit-scrollbar-track { background: transparent; }
+    .table-container::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+    
+    .inventory-table { width: 100%; border-collapse: collapse; }
+    .inventory-table thead { position: sticky; top: 0; background: rgba(20,20,30,0.95); backdrop-filter: blur(5px); z-index: 10; }
+    .inventory-table th, .inventory-table td { padding: 1rem; text-align: left; border-bottom: 1px solid var(--card-border); font-family: 'Rajdhani', sans-serif; }
+    .inventory-table th { color: var(--text-secondary); font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 1px; }
+    .inventory-table td { color: var(--text-primary); }
+    .inventory-table tr:hover { background: rgba(255,255,255,0.02); }
+    
+    .stock-badge { background: rgba(16,185,129,0.15); color: #10b981; padding: 4px 10px; border-radius: 100px; font-weight: bold; font-family: 'Orbitron', monospace; font-size: 0.75rem; white-space: nowrap; }
+    .stock-badge.low { background: rgba(245,158,11,0.15); color: #f59e0b; }
+    .stock-badge.empty { background: rgba(239,68,68,0.15); color: #ef4444; }
+    
+    /* ── Side Panel (Voice & Add) ── */
+    .voice-widget { background: linear-gradient(145deg, rgba(230,57,70,0.05), transparent); border: 1px solid rgba(230,57,70,0.2); border-radius: 16px; padding: 2rem; text-align: center; margin-bottom: 1.5rem; position: relative; overflow: hidden; }
+    .mic-button { background: var(--accent-red); color: white; border: none; width: 80px; height: 80px; border-radius: 50%; font-size: 2rem; cursor: pointer; box-shadow: 0 0 20px rgba(230,57,70,0.4); transition: all 0.3s; margin: 1.5rem 0; }
+    .mic-button.listening { background: #10b981; animation: pulse 1.5s infinite; box-shadow: 0 0 30px rgba(16,185,129,0.5); }
+    @keyframes pulse {
+      0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(16,185,129,0.7); }
+      70% { transform: scale(1.1); box-shadow: 0 0 0 20px rgba(16,185,129,0); }
+      100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(16,185,129,0); }
+    }
+    .transcript-box { margin-top: 1rem; min-height: 60px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 1rem; font-family: 'Rajdhani', sans-serif; font-size: 1.1rem; color: var(--text-secondary); text-align: left; }
+    .interim-text { color: var(--text-muted); font-style: italic; }
+    
+    .manual-add-grid { display: grid; gap: 1rem; margin-top: 1rem; text-align: left; }
+    .manual-add-grid .search-input-wrap { position: relative; margin-top: 10px; }
+    .manual-add-grid .search-input-wrap span { position: absolute; top: -18px; left: 5px; font-size: 0.75rem; color: var(--text-muted); font-family: 'Rajdhani'; text-transform: uppercase; }
+    .manual-add-grid input { width: 100%; border-radius: 8px; }
+
+    /* ── Print Styles ── */
+    @media print {
+      body { background: white; color: black; display: block; overflow: visible; height: auto; }
+      .sidebar, .top-nav, .kpi-grid, .voice-widget, .panel-card:nth-child(2) { display: none !important; }
+      .main-canvas { padding: 0; background: none; flex: unset; width: 100%; display: block; overflow: visible; }
+      .panel-card { border: none; box-shadow: none; background: transparent; padding: 0; }
+      .table-container { border: none; max-height: none; overflow: visible; }
+      .inventory-table th { background: #eee; color: black; border-bottom: 2px solid #ccc; position: static; }
+      .inventory-table td { border-bottom: 1px solid #ddd; color: black; }
+      .stock-badge { background: transparent !important; color: black !important; border: 1px solid black; }
+      .main-grid { display: block; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Sidebar ── -->
+<div class="sidebar">
+  <a href="index.html" class="sidebar-logo">
+    <div class="logo-icon">⚙️</div>
+    <div class="logo-text">JRK<span class="text-gradient">ADMIN</span></div>
+  </a>
+  <ul class="sidebar-menu">
+    <li><a href="#" class="active" onclick="switchTab(this, 'Dashboard')"><i class="fas fa-chart-line"></i> Dashboard</a></li>
+    <li><a href="#" onclick="switchTab(this, 'Inventory')"><i class="fas fa-boxes"></i> Inventory</a></li>
+    <li><a href="#" onclick="switchTab(this, 'Orders')"><i class="fas fa-shopping-cart"></i> Orders</a></li>
+    <li><a href="#" onclick="switchTab(this, 'Customers')"><i class="fas fa-users"></i> Customers</a></li>
+    <li><a href="#" onclick="switchTab(this, 'Analytics')"><i class="fas fa-chart-pie"></i> Analytics</a></li>
+    <li style="margin-top:auto;"><a href="#" onclick="switchTab(this, 'Settings')"><i class="fas fa-cog"></i> Settings</a></li>
+  </ul>
+</div>
+
+<!-- ── Main Canvas ── -->
+<div class="main-canvas">
+  <!-- Top Nav -->
+  <div class="top-nav">
+    <div class="search-box">
+      <i class="fas fa-search" style="color:var(--text-muted);"></i>
+      <input type="text" placeholder="Search products, orders...">
+    </div>
+    <div class="top-nav-actions">
+      <div class="nav-icon"><i class="far fa-bell"></i><div class="badge-dot"></div></div>
+      <div class="nav-icon"><i class="far fa-envelope"></i></div>
+      <div class="admin-profile">
+        <div style="text-align:right;">
+          <div style="font-family:'Rajdhani';font-weight:600;font-size:1.1rem;">Admin User</div>
+          <div style="font-family:'Rajdhani';font-size:0.85rem;color:var(--text-muted);">Manager</div>
+        </div>
+        <div class="avatar">AD</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- KPI Grid -->
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-icon" style="background:rgba(16,185,129,0.1);color:#10b981;"><i class="fas fa-wallet"></i></div>
+      <div class="kpi-info">
+        <h3 id="kpi-revenue">₹ 0</h3>
+        <p>Total Value</p>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon" style="background:rgba(59,130,246,0.1);color:#3b82f6;"><i class="fas fa-shopping-bag"></i></div>
+      <div class="kpi-info">
+        <h3 id="kpi-orders">0</h3>
+        <p>Active Orders</p>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon" style="background:rgba(245,158,11,0.1);color:#f59e0b;"><i class="fas fa-exclamation-triangle"></i></div>
+      <div class="kpi-info">
+        <h3 id="low-stock-count">0</h3>
+        <p>Low Stock Alerts</p>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon" style="background:rgba(139,92,246,0.1);color:#8b5cf6;"><i class="fas fa-box-open"></i></div>
+      <div class="kpi-info">
+        <h3 id="total-parts-count">0</h3>
+        <p>Total Products</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Grid -->
+  <div class="main-grid">
+    <!-- Left Col: Inventory Table -->
+    <div class="panel-card">
+      <div class="panel-header" style="flex-wrap: wrap; gap: 1rem;">
+        <div>
+           <h2 class="panel-title">Live Inventory Status</h2>
+           <span style="font-family:'Rajdhani';font-size:0.9rem;color:var(--text-muted);"><i class="fas fa-sync fa-spin"></i> Globally Synced</span>
+        </div>
+        <button onclick="window.print()" class="btn-primary" style="padding:0.5rem 1rem;font-size:0.9rem;"><i class="fas fa-print"></i> Print Report</button>
+      </div>
+      <div class="table-container">
+        <table class="inventory-table" id="inventory-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Product Name</th>
+              <th>Category</th>
+              <th>Price</th>
+              <th>Stock</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="inventory-body">
+            <!-- Populated by JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Right Col: Smart Tools -->
+    <div>
+      <div class="voice-widget">
+        <h3 style="font-family:'Orbitron';color:white;margin:0 0 1rem 0;">Smart Voice Manager</h3>
+        <div style="display:flex; gap:0.5rem; justify-content:center; margin-bottom:1rem;">
+          <button style="border:1px solid var(--text-muted);background:transparent;color:var(--text-muted);padding:4px 12px;border-radius:100px;cursor:pointer;font-family:'Rajdhani';" id="lang-en" onclick="setLanguage('en-US')">EN</button>
+          <button style="border:1px solid var(--accent-red);background:rgba(230,57,70,0.1);color:var(--accent-red);padding:4px 12px;border-radius:100px;cursor:pointer;font-family:'Rajdhani';" id="lang-hi" onclick="setLanguage('hi-IN')">हिंदी</button>
+        </div>
+        <button class="mic-button" id="mic-btn" onclick="toggleListening()">
+          <i class="fas fa-microphone"></i>
+        </button>
+        <div style="font-family:'Rajdhani'; color:var(--text-secondary); font-size:1rem;" id="status-text">
+          Tap to use voice commands
+        </div>
+        <div class="transcript-box" id="transcript-box">
+          <em>Awaiting speech...</em>
+        </div>
+      </div>
+
+      <div class="panel-card" style="padding:1.5rem;">
+        <h3 style="font-family:'Orbitron';color:var(--accent-red);margin:0 0 1rem 0;font-size:1.1rem;">Quick Manual Add / Edit</h3>
+        <div class="manual-add-grid">
+          <div class="search-input-wrap">
+            <span>Product Name</span>
+            <input type="text" id="manual-prod-name" class="search-input" placeholder="e.g. Brake Pad" />
+          </div>
+          <div class="search-input-wrap">
+            <span>Category</span>
+            <input type="text" id="manual-prod-cat" class="search-input" placeholder="e.g. Brakes" />
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+            <div class="search-input-wrap">
+              <span>Price (₹)</span>
+              <input type="number" id="manual-prod-price" class="search-input" placeholder="450" />
+            </div>
+            <div class="search-input-wrap">
+              <span>Stock</span>
+              <input type="number" id="manual-prod-stock" class="search-input" placeholder="10" />
+            </div>
+          </div>
+        </div>
+        <button class="btn-primary" style="margin-top:1.5rem;width:100%;padding:0.8rem;" onclick="manualUpdate()">Update / Add Product</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="js/products-data.js"></script>
+<script>
+  // Global Store Sync Logic
+  const adminDbKey = 'jrk_admin_inventory';
+  const storeDbKey = 'jrk_storefront';
+
+  let inventory = [];
+  const savedAdminDb = localStorage.getItem(adminDbKey);
+  
+  if (savedAdminDb) {
+      try {
+        inventory = JSON.parse(savedAdminDb);
+      } catch(e) { console.error(e); }
+  } else {
+      // First time admin loaded: initialize from PRODUCTS with ZERO stock
+      inventory = PRODUCTS.map(p => ({
+        id: 'PRD-' + String(p.id).padStart(3, '0'),
+        name: p.name,
+        cat: p.category + ' / ' + (p.subcategory || 'General'),
+        price: p.price || 0,
+        stock: 0 // Default to zero for unlaunched platform
+      }));
+      syncStorefront();
+  }
+
+  function syncStorefront() {
+      // 1. Save local state
+      localStorage.setItem(adminDbKey, JSON.stringify(inventory));
+      
+      // 2. Generate Storefront products map
+      const newStoreProducts = inventory.map((item, i) => {
+          const originalIdNum = parseInt(item.id.replace('PRD-', ''));
+          const originalP = PRODUCTS.find(p => p.id === originalIdNum);
+          
+          return {
+              id: originalP ? originalP.id : (1000 + i),
+              name: item.name,
+              category: "parts",
+              subcategory: item.cat.split(' / ')[1] ? item.cat.split(' / ')[1].trim().toLowerCase() : "general",
+              price: item.price,
+              originalPrice: item.price * 1.2,
+              rating: originalP ? originalP.rating : 4.5,
+              reviews: originalP ? originalP.reviews : 0,
+              badge: item.stock === 0 ? "Out of Stock" : (item.stock < 10 ? "Low Stock" : (originalP ? originalP.badge : "Available")),
+              badgeColor: item.stock === 0 ? "#ef4444" : (item.stock < 10 ? "#f59e0b" : (originalP ? originalP.badgeColor : "#10b981")),
+              compatibility: originalP ? originalP.compatibility : "Universal",
+              material: originalP ? originalP.material : "Standard",
+              warranty: originalP ? originalP.warranty : "N/A",
+              description: originalP ? originalP.description : "High quality spare part directly integrated with main DB.",
+              images: originalP ? originalP.images : ["part-engine.svg"],
+              inStock: item.stock > 0,
+              featured: originalP ? originalP.featured : false
+          };
+      });
+      localStorage.setItem(storeDbKey, JSON.stringify(newStoreProducts));
+  }
+
+  function renderInventory() {
+    const tbody = document.getElementById('inventory-body');
+    let lowStockCount = 0;
+    let totalRevenue = 0;
+    
+    tbody.innerHTML = inventory.map(item => {
+      let badgeClass = 'stock-badge';
+      let statusText = 'In Stock';
+      if (item.stock === 0) { badgeClass += ' empty'; statusText = 'Out of Stock'; lowStockCount++; }
+      else if (item.stock < 10) { badgeClass += ' low'; statusText = 'Low Stock'; lowStockCount++; }
+      
+      totalRevenue += (item.price * item.stock);
+      
+      return `
+        <tr>
+          <td><span style="color:var(--text-muted);font-size:0.85rem;">${item.id}</span></td>
+          <td style="font-weight:600;">${item.name}</td>
+          <td>${item.cat}</td>
+          <td style="color:var(--accent-red);font-family:'Orbitron',monospace;font-size:0.9rem;">₹${(item.price || 0).toLocaleString()}</td>
+          <td><span id="stock-${item.id}" class="${badgeClass}">${item.stock}</span></td>
+          <td><span style="font-size:0.85rem;color:var(--text-muted);">${statusText}</span></td>
+          <td>
+            <button onclick="removeProduct('${item.id}')" style="background:transparent;border:none;color:var(--text-muted);cursor:pointer;padding:5px;" title="Remove Item"><i class="fas fa-trash-alt"></i></button>
+          </td>
+        </tr>
+      `;
+    }).join('');
+    
+    // Update KPI UI
+    document.getElementById('kpi-revenue').innerText = '₹ ' + totalRevenue.toLocaleString('en-IN');
+    document.getElementById('low-stock-count').innerText = lowStockCount;
+    document.getElementById('total-parts-count').innerText = inventory.length;
+    document.getElementById('kpi-orders').innerText = "0"; // Hardcoded pending user orders capability
+    
+    syncStorefront();
+  }
+
+  // --- Voice Assistant Implementation ---
+  const micBtn = document.getElementById('mic-btn');
+  const transcriptBox = document.getElementById('transcript-box');
+  const statusText = document.getElementById('status-text');
+  
+  let currentLang = 'hi-IN';
+  let recognition = null;
+  let isListening = false;
+
+  function setLanguage(lang) {
+    currentLang = lang;
+    document.getElementById('lang-en').style.borderColor = lang === 'en-US' ? 'var(--accent-red)' : 'var(--text-muted)';
+    document.getElementById('lang-en').style.color = lang === 'en-US' ? 'var(--accent-red)' : 'var(--text-muted)';
+    document.getElementById('lang-en').style.background = lang === 'en-US' ? 'rgba(230,57,70,0.1)' : 'transparent';
+    
+    document.getElementById('lang-hi').style.borderColor = lang === 'hi-IN' ? 'var(--accent-red)' : 'var(--text-muted)';
+    document.getElementById('lang-hi').style.color = lang === 'hi-IN' ? 'var(--accent-red)' : 'var(--text-muted)';
+    document.getElementById('lang-hi').style.background = lang === 'hi-IN' ? 'rgba(230,57,70,0.1)' : 'transparent';
+    
+    if (isListening) { recognition.stop(); startRecognition(); }
+  }
+
+  function initSpeechRecognition() {
+    window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!window.SpeechRecognition) {
+      transcriptBox.innerHTML = "<span style='color:#ef4444'>Speech Recognition API is not supported in this browser.</span>";
+      micBtn.style.display = 'none';
+      return;
+    }
+    recognition = new SpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = true;
+    
+    recognition.onstart = () => {
+      isListening = true;
+      micBtn.classList.add('listening');
+      statusText.innerHTML = '<span style="color:#10b981">Listening... Speak now</span>';
+      transcriptBox.innerHTML = '';
+    };
+
+    recognition.onresult = (event) => {
+      let interimTranscript = '';
+      let finalTranscript = '';
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        if (event.results[i].isFinal) finalTranscript += event.results[i][0].transcript;
+        else interimTranscript += event.results[i][0].transcript;
+      }
+      if (finalTranscript) {
+        transcriptBox.innerHTML = `<strong>" ${finalTranscript} "</strong>`;
+        processCommand(finalTranscript);
+      } else if (interimTranscript) {
+        transcriptBox.innerHTML = `<span class="interim-text">${interimTranscript}...</span>`;
+      }
+    };
+    recognition.onerror = () => { isListening = false; micBtn.classList.remove('listening'); statusText.innerText = 'Error occurred.'; };
+    recognition.onend = () => { isListening = false; micBtn.classList.remove('listening'); statusText.innerText = 'Tap to use voice commands'; };
+  }
+
+  function toggleListening() {
+    if (!recognition) initSpeechRecognition();
+    if (isListening) recognition.stop();
+    else startRecognition();
+  }
+
+  function startRecognition() {
+    recognition.lang = currentLang;
+    recognition.start();
+  }
+
+  function speak(text) {
+    if ('speechSynthesis' in window) {
+      const msg = new SpeechSynthesisUtterance(text);
+      msg.lang = currentLang === 'hi-IN' ? 'hi-IN' : 'en-US';
+      window.speechSynthesis.speak(msg);
+    }
+  }
+
+  function processCommand(text) {
+    const t = text.toLowerCase();
+    let action = 'add'; 
+    let quantity = 1;
+    let fallbackName = null;
+    let matchedProduct = null;
+    let isNewProduct = false;
+    
+    const addKeywords = ['add', 'add karo', 'daal do', 'badha do', 'plus', 'aur', 'bring', 'buy'];
+    const removeKeywords = ['sold', 'remove', 'kam karo', 'nikaal do', 'hata do', 'minus', 'bik gaya', 'bech diya'];
+    
+    if (addKeywords.some(k => t.includes(k))) action = 'add';
+    else if (removeKeywords.some(k => t.includes(k))) action = 'remove';
+    
+    const numMatch = t.match(/\d+/);
+    if (numMatch) quantity = parseInt(numMatch[0]);
+    else if (t.includes('five') || t.includes('panch') || t.includes('paanch') || t.includes('५')) quantity = 5;
+    else if (t.includes('ten') || t.includes('das') || t.includes('दस') || t.includes('१०')) quantity = 10;
+    else if (t.includes('fifty') || t.includes('pachas') || t.includes('pachchas') || t.includes('पचास')) quantity = 50;
+    
+    let maxScore = 0;
+    let bestMatch = null;
+    inventory.forEach(p => {
+      const pNameLower = p.name.toLowerCase();
+      if (t.includes(pNameLower)) { maxScore = 100; bestMatch = p.id; }
+      else {
+        const tWords = t.split(/\s+/).filter(w => w.length >= 3 && !['add','the','and','remove','item','from','inventory'].includes(w));
+        let matches = 0;
+        tWords.forEach(w => { if (pNameLower.includes(w)) matches++; });
+        const numWordsInName = Math.max(1, pNameLower.split(/[\s-]+/).length);
+        const score = matches / numWordsInName;
+        if (score > maxScore && matches > 0) { maxScore = score; bestMatch = p.id; }
+      }
+    });
+    if (bestMatch) matchedProduct = bestMatch;
+    
+    if (!matchedProduct && action === 'add') {
+      isNewProduct = true;
+      let cleanText = t.replace(/[0-9]+/g, '').replace(/['"]/g, '').trim();
+      const stopWords = [...addKeywords, ...removeKeywords, 'five','panch','ten','das','fifty','pachas','one','ek','an','a','item','named','product','quantity','of','ki','ka','the','please','karo','to','in','inventory','my'];
+      let words = cleanText.split(/\s+/).filter(w => !stopWords.includes(w));
+      cleanText = words.join(' ').trim();
+      fallbackName = cleanText.length > 2 ? cleanText.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') : "New Custom Part";
+      matchedProduct = 'PRD-' + String(inventory.length + 1).padStart(3, '0');
+      inventory.unshift({ id: matchedProduct, name: fallbackName, cat: 'Auto Added (Voice)', price: 0, stock: 0 });
+    }
+
+    if (matchedProduct) {
+      const prodIndex = inventory.findIndex(p => p.id === matchedProduct);
+      let prod = inventory[prodIndex];
+      if (action === 'add') prod.stock += quantity;
+      else if (action === 'remove') prod.stock = Math.max(0, prod.stock - quantity);
+      
+      renderInventory();
+      
+      const stockBadge = document.getElementById('stock-' + prod.id);
+      if(stockBadge) {
+          stockBadge.style.boxShadow = '0 0 20px #10b981';
+          setTimeout(() => stockBadge.style.boxShadow = 'none', 2000);
+      }
+      
+      let audioFeedback = "";
+      let visualFeedback = "";
+      if (isNewProduct) {
+        audioFeedback = currentLang === 'hi-IN' ? `नया आइटम। ${quantity} ${prod.name} इन्वेंटरी में जोड़ दिया गया है।` : `New item detected. Added ${quantity} ${prod.name}.`;
+        visualFeedback = `<br><span style="color:#10b981;font-size:0.9rem;display:block;margin-top:0.5rem;"><i class="fas fa-plus-circle"></i> Added New Product: ${prod.name} (${quantity})</span>`;
+      } else {
+        audioFeedback = currentLang === 'hi-IN' ? `ठीक है। ${quantity} ${prod.name} अपडेट कर दिया गया है। नया स्टॉक है ${prod.stock}।` : `Got it. Updated ${quantity} units of ${prod.name}. New stock is ${prod.stock}.`;
+        visualFeedback = `<br><span style="color:#10b981;font-size:0.9rem;display:block;margin-top:0.5rem;"><i class="fas fa-check-circle"></i> Successfully Updated: ${prod.name} -> ${prod.stock}</span>`;
+      }
+      speak(audioFeedback);
+      transcriptBox.innerHTML += visualFeedback;
+    } else {
+      let errorAudio = currentLang === 'hi-IN' ? 'मुझे प्रोडक्ट का नाम समझ नहीं आया।' : 'Sorry, I could not identify the product.';
+      speak(errorAudio);
+      transcriptBox.innerHTML += `<br><span style="color:#ef4444;font-size:0.9rem;display:block;margin-top:0.5rem;"><i class="fas fa-times-circle"></i> Unrecognized Product</span>`;
+    }
+  }
+
+  // --- Manual Update & Delete ---
+  function manualUpdate() {
+    const name = document.getElementById('manual-prod-name').value;
+    const cat = document.getElementById('manual-prod-cat').value || 'Uncategorized';
+    const price = parseInt(document.getElementById('manual-prod-price').value) || 0;
+    const stock = parseInt(document.getElementById('manual-prod-stock').value);
+    
+    if (!name || isNaN(stock)) { showToast('Please enter both name and quantity', 'error'); return; }
+    
+    const prod = inventory.find(p => p.name.toLowerCase().includes(name.toLowerCase()));
+    if (prod) {
+      prod.stock = stock;
+      if (price > 0) prod.price = price;
+      if (cat !== 'Uncategorized') prod.cat = cat;
+      showToast(`Updated ${prod.name} successfully`, 'success');
+    } else {
+      const newId = 'PRD-' + String(inventory.length + 1).padStart(3, '0');
+      inventory.unshift({ id: newId, name: name, cat: cat, price: price, stock: stock });
+      showToast(`Added new product ${name} successfully`, 'success');
+    }
+    
+    renderInventory();
+    document.getElementById('manual-prod-name').value = '';
+    document.getElementById('manual-prod-cat').value = '';
+    document.getElementById('manual-prod-price').value = '';
+    document.getElementById('manual-prod-stock').value = '';
+  }
+
+  function removeProduct(id) {
+    const prodIndex = inventory.findIndex(p => p.id === id);
+    if (prodIndex !== -1) {
+      const prodName = inventory[prodIndex].name;
+      inventory.splice(prodIndex, 1);
+      renderInventory();
+      showToast(`Removed product ${prodName}`, 'success');
+    }
+  }
+
+  function showToast(msg, type) {
+    const toast = document.createElement('div');
+    toast.style.position = 'fixed';
+    toast.style.bottom = '2rem';
+    toast.style.right = '2rem';
+    toast.style.padding = '1rem 2rem';
+    toast.style.background = type === 'success' ? '#10b981' : '#ef4444';
+    toast.style.color = 'white';
+    toast.style.borderRadius = '12px';
+    toast.style.zIndex = '10000';
+    toast.style.fontFamily = 'Rajdhani';
+    toast.innerText = msg;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+  }
+  
+  function switchTab(el, tabName) {
+    document.querySelectorAll('.sidebar-menu a').forEach(a => a.classList.remove('active'));
+    el.classList.add('active');
+    if (tabName !== 'Dashboard') {
+        showToast(tabName + ' module is coming soon!', 'error');
+    } else {
+        showToast('Viewing Dashboard', 'success');
+    }
+  }
+
+  renderInventory();
+  initSpeechRecognition();
+</script>
+</body>
+</html>
