@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>JRK Auto Parts | Mobile Application</title>
+  <meta name="description" content="JRK Auto Parts Mobile Application - Genuine High Performance Car & Motorcycle Parts Marketplace." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏎️</text></svg>" />
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="styles/app.css" />
+  <!-- Font Awesome 6 Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" />
+</head>
+<body>
+
+  <!-- Toast Notification -->
+  <div class="app-toast" id="app-toast">Item Added to Cart</div>
+
+  <!-- Owner Access PIN Modal -->
+  <div class="modal-overlay" id="pin-modal" style="display:none;">
+    <div class="modal-box">
+      <div style="font-size:2rem;color:var(--neon-green);margin-bottom:8px;">
+        <i class="fas fa-user-shield"></i>
+      </div>
+      <div style="font-family:'Orbitron';font-size:1rem;color:#fff;margin-bottom:4px;">OWNER ACCESS LOGIN</div>
+      <p style="font-size:0.78rem;color:var(--text-sub);margin-bottom:16px;">Enter Owner PIN to unlock inventory management & customer inquiries.</p>
+      
+      <input type="password" id="pin-input" class="form-control" style="text-align:center;font-size:1.2rem;letter-spacing:6px;font-family:'Orbitron';" placeholder="••••" maxlength="4">
+      <div style="font-size:0.7rem;color:var(--text-muted);margin:-6px 0 16px 0;">(Default Security PIN: <strong>1234</strong>)</div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <button class="btn-neon" style="background:rgba(255,255,255,0.1);color:#fff;" onclick="closeOwnerPinModal()">CANCEL</button>
+        <button class="btn-neon" onclick="verifyOwnerPin()">UNLOCK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile Device Frame Container -->
+  <div class="device-container">
+    <!-- Dynamic Phone Island / Notch -->
+    <div class="phone-notch">
+      <div class="notch-camera"></div>
+    </div>
+
+    <!-- App Top Bar Header -->
+    <header class="app-header">
+      <div class="brand-title" onclick="openOwnerPinModal()">
+        JRK<span>AUTO</span>
+        <span class="mode-badge" id="app-mode-badge">CUSTOMER</span>
+      </div>
+      <div class="header-actions">
+        <button class="icon-btn" title="Notifications" onclick="showToast('No new notifications')">
+          <i class="far fa-bell"></i>
+        </button>
+        <button class="icon-btn" title="Cart" onclick="switchTab('cart')">
+          <i class="fas fa-shopping-bag"></i>
+          <div class="badge-count" id="cart-badge-count" style="display:none;">0</div>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Viewport Area -->
+    <main class="app-content" id="app-content-area">
+      <!-- Dynamic View Rendered via js/app.js -->
+    </main>
+
+    <!-- App Bottom Navigation Bar -->
+    <nav class="app-nav">
+      <!-- Dynamically updated by updateAppNavForRole() in js/app.js -->
+    </nav>
+  </div>
+
+  <!-- Application Logic Scripts -->
+  <script src="js/products-data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
